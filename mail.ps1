@@ -12,7 +12,7 @@ $query=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly
 
 
 #Адрес сервера SMTP для отправки
-$serverSmtp = "smtp.yandex.ru" 
+$serverSmtp = "$config[6]" 
 
 #Порт сервера
 $port = 587
