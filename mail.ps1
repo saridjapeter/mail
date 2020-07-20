@@ -12,13 +12,13 @@ $query=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly
 
 
 #Адрес сервера SMTP для отправки
-$serverSmtp = "$config[6]" 
+$serverSmtp = $config[6].Data 
 
 #Порт сервера
-$port = 587
+$port = $config[26].Data 
 
 #От кого
-$From = "claimdesk_0@be2b.ru" 
+$From = $config[5].Data 
 
 #Кому
 $To = "p.saridja@be2b.ru" 
@@ -27,8 +27,8 @@ $To = "p.saridja@be2b.ru"
 $subject = $query[2]
 
 #Логин и пароль от ящики с которого отправляете login@yandex.ru
-$user = "claimdesk_0@be2b.ru"
-$pass = ""
+$user = $config[7].Data 
+$pass = $config[8].Data 
 
 #Путь до файла 
 #$file = "D:\zabbix\tets.txt"
