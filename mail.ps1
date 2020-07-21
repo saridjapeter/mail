@@ -1,15 +1,22 @@
-﻿#& "C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\sqlcmd" -S 192.168.0.11 -U sa -P pCOc6Ly79p -Q "set nocount on;SELECT TOP (1) ID_Email, Receiver, Message_Text, Subject FROM Claim.dbo.Email" -h -1 -f 65001 -o D:\mail\mail.txt
-##$a
-#Install-Module -Name SqlServer
+﻿#Install-Module -Name SqlServer
 #Install-Module -Name SqlServer -Scope CurrentUser
 
 #$ins = "192.168.0.11"
 #$user="sa"
 #$pass="pCOc6Ly79p"
+#Берем настройки с dbo.Config
 $config=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "set nocount on;SELECT Data FROM Config"
-$config[6]
-$query=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "set nocount on;SELECT TOP (1) Receiver, Message_Text, Subject FROM Email"
+#Смотрим письмо
+$query=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "set nocount on;SELECT TOP (1) Receiver, Message_Text, Subject, ID_Attachment, ID_Source FROM Email"
 
+$Receiver=$query[0]
+$Message=$query[1]
+$ID_Source=$query[4]
+$ID_Attach=$query[3]
+$time=Get-Date -Format u 
+$time=$time.Substring(0,$time.Length -1)
+$insert=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "INSERT INTO Dispatch (Message_Type, Receiver, Message, Message_Time, ID_Source, ID_Attach) VALUES ('0','$Receiver','$Message','$time','$ID_Source','$ID_Attach')"
+#('0', $query[0], $query[1], $time, '', $query[4], $query[3])"
 
 #Адрес сервера SMTP для отправки
 $serverSmtp = $config[6].Data 
@@ -21,6 +28,7 @@ $port = $config[26].Data
 $From = $config[5].Data 
 
 #Кому
+#$To = "$query[0]"
 $To = "p.saridja@be2b.ru" 
 
 #Тема письма
