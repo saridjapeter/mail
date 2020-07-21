@@ -6,17 +6,14 @@
 #$pass="pCOc6Ly79p"
 #Берем настройки с dbo.Config
 $config=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "set nocount on;SELECT Data FROM Config"
-#Смотрим письмо
+#Смотрим письмо в Email
 $query=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "set nocount on;SELECT TOP (1) Receiver, Message_Text, Subject, ID_Attachment, ID_Source FROM Email"
+#Добавляем в Dispatch
+Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "INSERT INTO Dispatch (Receiver, Message, ID_Source, ID_Attach, Message_Type, Message_Time) SELECT TOP (1) Receiver, Message_Text, ID_Source, ID_Attachment, Message_Type='0', Message_Time=GETDATE()  FROM Email"  
+#Удаляем запись в Email
+#Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "DELETE FROM Email ORDER BY ID_Email ASC LIMIT 1"
+#Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "DELETE TOP(1) FROM Email"
 
-$Receiver=$query[0]
-$Message=$query[1]
-$ID_Source=$query[4]
-$ID_Attach=$query[3]
-$time=Get-Date -Format u 
-$time=$time.Substring(0,$time.Length -1)
-$insert=Invoke-Sqlcmd -ServerInstance 192.168.0.11 -Username sa -Password pCOc6Ly79p -Database Claim -Query "INSERT INTO Dispatch (Message_Type, Receiver, Message, Message_Time, ID_Source, ID_Attach) VALUES ('0','$Receiver','$Message','$time','$ID_Source','$ID_Attach')"
-#('0', $query[0], $query[1], $time, '', $query[4], $query[3])"
 
 #Адрес сервера SMTP для отправки
 $serverSmtp = $config[6].Data 
@@ -28,8 +25,8 @@ $port = $config[26].Data
 $From = $config[5].Data 
 
 #Кому
-#$To = "$query[0]"
-$To = "p.saridja@be2b.ru" 
+$To = $query[0]
+#$To = "p.saridja@be2b.ru" 
 
 #Тема письма
 $subject = $query[2]
